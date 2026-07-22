@@ -4365,7 +4365,7 @@ body.overview-mode::before {
   grid-template-columns: 2fr 0.9fr;
   gap: 24px;
   align-items: center;
-  margin-top: 12px;
+  margin-top: -6px;
 }
 .sh-hero {
   background: transparent;
