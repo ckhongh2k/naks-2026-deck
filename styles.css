@@ -4492,7 +4492,7 @@ body.overview-mode::before {
 .ai-flow {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
+  gap: 0;
   margin-top: 0;
 }
 .ai-step {
@@ -4523,6 +4523,7 @@ body.overview-mode::before {
   right: -12px;
   top: 50%;
   transform: translateY(-50%);
+  z-index: 1;
   width: 0;
   height: 0;
   border-top: 12px solid transparent;
