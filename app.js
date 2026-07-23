@@ -108,11 +108,25 @@
     return Array.from(document.querySelectorAll('video')).find(v => !v.paused && !v.ended);
   }
 
+  // 좌우 키로 조작할 video: ① 재생 중 → ② 포커스된 video → ③ 활성 슬라이드에서 보다가 멈춘 video
+  function seekTargetVideo() {
+    const playing = playingVideo();
+    if (playing) return playing;
+    const focused = document.activeElement;
+    if (focused && focused.tagName === 'VIDEO' && !focused.ended) return focused;
+    const scope = body.classList.contains('present') && slides[currentIdx] ? slides[currentIdx] : document;
+    return Array.from(scope.querySelectorAll('video')).find(v => {
+      if (v.currentTime <= 0 || v.ended) return false;
+      const r = v.getBoundingClientRect();
+      return r.bottom > 0 && r.top < window.innerHeight;
+    });
+  }
+
   // ==== 키보드 ====
   document.addEventListener('keydown', (e) => {
-    // 재생 중 video 있으면 좌우 = 5초 seek (편집·발표 모드 공통)
+    // 조작 대상 video 있으면 좌우 = 5초 seek (편집·발표 모드 공통)
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-      const v = playingVideo();
+      const v = seekTargetVideo();
       if (v) {
         e.preventDefault();
         if (e.key === 'ArrowRight') {
