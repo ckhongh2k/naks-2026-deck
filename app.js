@@ -58,7 +58,21 @@
       else s.classList.remove('active');
     });
     updateTopnavActive(idx);
+    fitActiveSlide();
   }
+
+  // 발표 모드: 실제 창 크기 기준으로 배율 계산 (vw/vh 오차·브라우저 줌 무관)
+  function fitActiveSlide() {
+    if (!body.classList.contains('present')) {
+      slides.forEach(s => { s.style.transform = ''; });
+      return;
+    }
+    const scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    const active = slides[currentIdx];
+    if (active) active.style.transform = `scale(${scale})`;
+  }
+  window.addEventListener('resize', fitActiveSlide);
+  document.addEventListener('fullscreenchange', fitActiveSlide);
 
   function updateTopnavActive(idx) {
     // 슬라이드 번호 1-based
