@@ -1451,7 +1451,7 @@ html, body {
 
 /* 발표 모드 */
 body.present {
-  background: #000;
+  background: #ffffff;
   overflow: hidden;
 }
 body.present .topnav,
