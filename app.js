@@ -103,18 +103,34 @@
   slides.forEach(s => observer.observe(s));
 
   // ==== 오버뷰 모드 (4면 분할) ====
+  // 화면에 2×2 = 4장이 딱 차도록 실제 창 크기로 배율 계산
+  const OV = { padX: 16, padTop: 70, padBottom: 10, gap: 12 };
+  function fitOverview() {
+    if (!body.classList.contains('overview-mode')) {
+      slides.forEach(s => { s.style.zoom = ''; });
+      return;
+    }
+    const cellW = (window.innerWidth - OV.padX * 2 - OV.gap) / 2;
+    const cellH = (window.innerHeight - OV.padTop - OV.padBottom - OV.gap) / 2;
+    const z = Math.min(cellW / 1280, cellH / 720);
+    slides.forEach(s => { s.style.zoom = z; });
+  }
   function toggleOverview() {
     if (body.classList.contains('present')) return;
     body.classList.toggle('overview-mode');
     if (body.classList.contains('overview-mode')) {
       history.replaceState(null, '', '#overview');
+      fitOverview();
       window.scrollTo({ top: 0 });
     } else {
       history.replaceState(null, '', ' ');
+      fitOverview();
     }
   }
+  window.addEventListener('resize', fitOverview);
   if (window.location.hash === '#overview') {
     body.classList.add('overview-mode');
+    fitOverview();
   }
 
   // ==== 재생 중 video 찾기 (문서 내 아무 video나) ====

@@ -1549,13 +1549,13 @@ body.present .slide-index { display: none; }
    ============================================================ */
 body.overview-mode .deck {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  padding: 90px 24px 40px;
+  grid-template-columns: repeat(2, max-content);
+  justify-content: center;
+  gap: 12px;
+  padding: 70px 16px 10px;
   align-items: start;
 }
 body.overview-mode .slide {
-  zoom: 0.5;
   margin: 0;
   box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
 }
