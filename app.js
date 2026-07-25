@@ -162,27 +162,14 @@
     return Array.from(document.querySelectorAll('video')).find(v => !v.paused && !v.ended);
   }
 
-  // 좌우 키로 조작할 video: ① 재생 중 → ② 포커스된 video → ③ 화면에 보이는 시청 중 video
-  // 끝난(ended) 영상은 ←(되감기)일 때만 대상. →는 슬라이드 진행에 양보.
-  function seekTargetVideo(key) {
-    const rewindOk = (v) => !v.ended || key === 'ArrowLeft';
-    const playing = playingVideo();
-    if (playing) return playing;
-    const focused = document.activeElement;
-    if (focused && focused.tagName === 'VIDEO' && focused.currentTime > 0 && rewindOk(focused)) return focused;
-    const scope = body.classList.contains('present') && slides[currentIdx] ? slides[currentIdx] : document;
-    return Array.from(scope.querySelectorAll('video')).find(v => {
-      if (v.currentTime <= 0 || !rewindOk(v)) return false;
-      const r = v.getBoundingClientRect();
-      return r.bottom > 0 && r.top < window.innerHeight;
-    });
-  }
 
   // ==== 키보드 ====
   document.addEventListener('keydown', (e) => {
-    // 조작 대상 video 있으면 좌우 = 5초 seek (편집·발표 모드 공통)
+    // 좌우 키 규칙: ① 영상에 포커스 → 크롬 기본 seek에 맡김 ② 재생 중 영상 → 5초 seek ③ 그 외 → 슬라이드 이동
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-      const v = seekTargetVideo(e.key);
+      const focused = document.activeElement;
+      if (focused && focused.tagName === 'VIDEO') return; // 기본 동작(±5초)에 위임
+      const v = playingVideo();
       if (v) {
         e.preventDefault();
         if (e.key === 'ArrowRight') {
