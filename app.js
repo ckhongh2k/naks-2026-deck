@@ -64,7 +64,9 @@
   // 발표 모드: 실제 창 크기 기준으로 배율 계산 (vw/vh 오차·브라우저 줌 무관)
   function fitActiveSlide() {
     if (!body.classList.contains('present')) {
-      slides.forEach(s => { s.style.transform = ''; });
+      if (!body.classList.contains('overview-mode')) {
+        slides.forEach(s => { s.style.transform = ''; });
+      }
       return;
     }
     const scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
@@ -108,9 +110,14 @@
   const deckEl = document.getElementById('deck');
   function fitOverview() {
     if (!body.classList.contains('overview-mode')) {
-      slides.forEach(s => { s.style.transform = ''; s.style.transformOrigin = ''; });
+      slides.forEach(s => { s.style.transformOrigin = ''; });
       deckEl.style.gridTemplateColumns = '';
       deckEl.style.gridAutoRows = '';
+      if (body.classList.contains('present')) {
+        fitActiveSlide(); // 발표 모드 배율 보존
+      } else {
+        slides.forEach(s => { s.style.transform = ''; });
+      }
       return;
     }
     const cellW = (window.innerWidth - OV.padX * 2 - OV.gap) / 2;
@@ -147,15 +154,17 @@
     return Array.from(document.querySelectorAll('video')).find(v => !v.paused && !v.ended);
   }
 
-  // 좌우 키로 조작할 video: ① 재생 중 → ② 포커스된 video → ③ 활성 슬라이드에서 보다가 멈춘 video
-  function seekTargetVideo() {
+  // 좌우 키로 조작할 video: ① 재생 중 → ② 포커스된 video → ③ 화면에 보이는 시청 중 video
+  // 끝난(ended) 영상은 ←(되감기)일 때만 대상. →는 슬라이드 진행에 양보.
+  function seekTargetVideo(key) {
+    const rewindOk = (v) => !v.ended || key === 'ArrowLeft';
     const playing = playingVideo();
     if (playing) return playing;
     const focused = document.activeElement;
-    if (focused && focused.tagName === 'VIDEO' && !focused.ended) return focused;
+    if (focused && focused.tagName === 'VIDEO' && focused.currentTime > 0 && rewindOk(focused)) return focused;
     const scope = body.classList.contains('present') && slides[currentIdx] ? slides[currentIdx] : document;
     return Array.from(scope.querySelectorAll('video')).find(v => {
-      if (v.currentTime <= 0 || v.ended) return false;
+      if (v.currentTime <= 0 || !rewindOk(v)) return false;
       const r = v.getBoundingClientRect();
       return r.bottom > 0 && r.top < window.innerHeight;
     });
@@ -165,7 +174,7 @@
   document.addEventListener('keydown', (e) => {
     // 조작 대상 video 있으면 좌우 = 5초 seek (편집·발표 모드 공통)
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-      const v = seekTargetVideo();
+      const v = seekTargetVideo(e.key);
       if (v) {
         e.preventDefault();
         if (e.key === 'ArrowRight') {
