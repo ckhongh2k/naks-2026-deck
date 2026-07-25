@@ -193,10 +193,10 @@
       }
       return;
     }
-    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ' || e.key === 'PageDown') {
       e.preventDefault();
       setActiveSlide(currentIdx + 1);
-    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
       e.preventDefault();
       setActiveSlide(currentIdx - 1);
     } else if (e.key === 'Escape') {
@@ -207,6 +207,21 @@
       setActiveSlide(slides.length - 1);
     }
   });
+
+  // ==== 발표 모드: 휠·트랙패드 위아래 스크롤로 슬라이드 이동 ====
+  let wheelLockUntil = 0;
+  let wheelAcc = 0;
+  document.addEventListener('wheel', (e) => {
+    if (!body.classList.contains('present')) return;
+    e.preventDefault();
+    const now = Date.now();
+    if (now < wheelLockUntil) return;
+    wheelAcc += e.deltaY;
+    if (Math.abs(wheelAcc) < 60) return; // 트랙패드 미세 스크롤 무시
+    setActiveSlide(currentIdx + (wheelAcc > 0 ? 1 : -1));
+    wheelAcc = 0;
+    wheelLockUntil = now + 600; // 관성 스크롤 중복 방지
+  }, { passive: false });
 
   // fullscreen change → present class sync
   document.addEventListener('fullscreenchange', () => {
