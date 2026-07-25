@@ -55,7 +55,10 @@
     currentIdx = idx;
     slides.forEach((s, i) => {
       if (i === idx) s.classList.add('active');
-      else s.classList.remove('active');
+      else {
+        s.classList.remove('active');
+        s.querySelectorAll('video').forEach(v => { if (!v.paused) v.pause(); });
+      }
     });
     updateTopnavActive(idx);
     fitActiveSlide();
