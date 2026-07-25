@@ -149,6 +149,14 @@
     fitOverview();
   }
 
+  // ==== 동시 재생 방지: 한 영상이 시작되면 나머지는 일시정지 ====
+  document.addEventListener('play', (e) => {
+    if (e.target.tagName !== 'VIDEO') return;
+    document.querySelectorAll('video').forEach(v => {
+      if (v !== e.target && !v.paused) v.pause();
+    });
+  }, true);
+
   // ==== 재생 중 video 찾기 (문서 내 아무 video나) ====
   function playingVideo() {
     return Array.from(document.querySelectorAll('video')).find(v => !v.paused && !v.ended);
