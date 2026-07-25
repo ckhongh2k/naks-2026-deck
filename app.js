@@ -105,15 +105,24 @@
   // ==== 오버뷰 모드 (4면 분할) ====
   // 화면에 2×2 = 4장이 딱 차도록 실제 창 크기로 배율 계산
   const OV = { padX: 16, padTop: 70, padBottom: 10, gap: 12 };
+  const deckEl = document.getElementById('deck');
   function fitOverview() {
     if (!body.classList.contains('overview-mode')) {
-      slides.forEach(s => { s.style.zoom = ''; });
+      slides.forEach(s => { s.style.transform = ''; s.style.transformOrigin = ''; });
+      deckEl.style.gridTemplateColumns = '';
+      deckEl.style.gridAutoRows = '';
       return;
     }
     const cellW = (window.innerWidth - OV.padX * 2 - OV.gap) / 2;
     const cellH = (window.innerHeight - OV.padTop - OV.padBottom - OV.gap) / 2;
     const z = Math.min(cellW / 1280, cellH / 720);
-    slides.forEach(s => { s.style.zoom = z; });
+    // zoom은 크롬 video 컨트롤 렌더링을 깨뜨림 → transform + 셀 크기 명시
+    deckEl.style.gridTemplateColumns = `repeat(2, ${1280 * z}px)`;
+    deckEl.style.gridAutoRows = `${720 * z}px`;
+    slides.forEach(s => {
+      s.style.transformOrigin = 'top left';
+      s.style.transform = `scale(${z})`;
+    });
   }
   function toggleOverview() {
     if (body.classList.contains('present')) return;
